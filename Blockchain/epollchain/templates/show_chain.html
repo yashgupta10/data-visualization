@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div><h1>Current Chain ({{valid}})</h1></div>
+    {% for res in res_chain %}
+        <article class="media content-section">
+          <div class="media-body">
+            <p class="article-content">{{ res }}</p>
+          </div>
+        </article>
+    {% endfor %}
+{% endblock content %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + 'profile.jpg') }}">
+    <div class="media-body">
+      <div class="article-metadata">
+        <a class="mr-2" href="#">{{ pollvote.posted_by }}</a>
+        <small class="text-muted">{{ pollvote.time_posted}}</small>
+      </div>
+      <h2 class="article-title">{{ pollvote.question_title }}</h2>
+      <p class="article-content">{{ pollvote.question }}</p>
+    </div>
+  </article>
+ <!-- Modal -->
+ <div class="content-section">
+  <form method="POST" action="" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+      <fieldset class="form-group">
+          <legend class="border-bottom mb-4">Please vote </legend>
+          <div class="input-group-prepend">
+              {{ form.vote_value(class="radio-inline list-inline list-group-horizontal") }}
+
+          </div>
+          
+      </fieldset>
+      <div class="form-group">
+        {{ form.submit(class="btn btn-outline-info") }}
+    </div>
+  </form>
+</div>
+{% endblock content %}

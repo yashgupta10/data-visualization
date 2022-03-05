@@ -1,0 +1,6 @@
+C:\Users\yashm\Desktop\Blockchain>
+set FLASK_APP=Blockvote
+set FLASK_ENV=development
+set FLASK_DEBUG=1
+
+C:\Users\yashm\Desktop\Blockchain>flask run --host=127.0.0.1 --port=8000

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+    {% for poll in transactions %}
+        <article class="media content-section">
+          <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + 'profile.jpg' )}}">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-2" href="#">{{ poll.posted_by }}</a>
+              <small class="text-muted">{{ poll.time_posted }}</small>
+            </div>
+            <p class="article-title"><kbd >Title:-</kbd> {{ poll.question_title }} <a href="/mine/{{poll.transaction_id}}" class="btn btn-outline-info mt-2 float-right ">Mine</a></p>
+            <p class="article-content"><kbd >Question :-</kbd> {{ poll.question }}</p>
+            <p class="article-content"><kbd >Vote :-</kbd> {{ poll.vote }}</p>
+            <p class="article-content"><kbd >Voted By :-</kbd> {{ poll.voter }}</p>
+            <p class="article-content"><kbd >Voted on  :-</kbd> {{ poll.time_voted }}</p>
+          </div>
+        </article>
+    {% endfor %}
+{% endblock content %}

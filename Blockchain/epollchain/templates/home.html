@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div><h1>Welcome , {{ res_personal.name }}</h1></div>
+<br>    
+<div><p>Email ID - {{ res_personal.emailid }}</p></div>
+<div><p>Private Key - {{ res_personal.privatekey }}</p></div>
+<div><p>Public Key - {{ res_personal.publickey }}</p></div>
+<div><p>Status - {{ res_nodes.message }}</p></div>
+{% if res_nodes.total_nodes %}
+<div><p>Node list - {{ res_nodes.total_nodes }}</p></div>
+{% else %}
+<div><p>Node list - Empty {{ res_nodes.total_nodes }}</p></div>
+{% endif %}
+{% endblock content %}
