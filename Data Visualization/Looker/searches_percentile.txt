@@ -1,0 +1,170 @@
+is_on_trial
+
+is_paying
+
+with cte as (
+      select 
+      PERCENTILE_DISC((searches_count), 0.90) OVER(partition by user_day_n ) AS percentile_90,
+      PERCENTILE_DISC((searches_count), 0.75) OVER(partition by user_day_n ) AS percentile_75,
+      PERCENTILE_DISC((searches_count), 1) OVER(partition by user_day_n ) AS percentile_max,
+      PERCENTILE_DISC((searches_count), 0) OVER(partition by user_day_n ) AS percentile_min,
+      PERCENTILE_DISC((searches_count), 0.5) OVER(partition by user_day_n ) AS percentile_median,
+      PERCENTILE_DISC((searches_count), 0.25) OVER(partition by user_day_n ) AS percentile_25,
+      FROM `bia-prod-268616.go_to_market_sensitive.df_daily_rolling_activity`
+      WHERE user_week_n >= "2021-04-01" and is_active = 1 and contact_type <> 'Internal User'
+   --   group by 1,2
+      order by 1 desc)
+      
+      select 
+      ANY_VALUE(percentile_min) as searches_percentile_min,
+      ANY_VALUE(percentile_25) as searches_percentile_25,
+      ANY_VALUE(percentile_median) as searches_percentile_median,
+      ANY_VALUE(percentile_75) as searches_percentile_75,
+      ANY_VALUE(percentile_90) as searches_percentile90,
+      ANY_VALUE(percentile_max) as searches_percentile_max,
+      from cte  order by 1 desc
+	  -----------------
+	  
+with cte1 as ( select user_week_n,username,sum(documents_read_count) 
+FROM `bia-prod-268616.go_to_market_sensitive.df_daily_rolling_activity`
+      WHERE user_week_n >= "2021-04-01" and is_active = 1 and contact_type <> 'Internal User'
+      group by 1,2
+      order by 1 desc)
+
+with cte2 as (
+     
+      PERCENTILE_DISC(sum(searches_count), 0.90) OVER() AS percentile_90,
+      PERCENTILE_DISC(sum(searches_count), 0.75) OVER() AS percentile_75,
+      PERCENTILE_DISC(sum(searches_count), 1) OVER() AS percentile_max,
+      PERCENTILE_DISC(sum(searches_count), 0) OVER() AS percentile_min,
+      PERCENTILE_DISC(sum(searches_count), 0.5) OVER() AS percentile_median,
+      PERCENTILE_DISC(sum(searches_count), 0.25) OVER() AS percentile_25,
+      FROM cte1
+ )
+      
+      select 
+      ANY_VALUE(percentile_min) as searches_percentile_min,
+      ANY_VALUE(percentile_25) as searches_percentile_25,
+      ANY_VALUE(percentile_median) as searches_percentile_median,
+      ANY_VALUE(percentile_75) as searches_percentile_75,
+      ANY_VALUE(percentile_90) as searches_percentile90,
+      ANY_VALUE(percentile_max) as searches_percentile_max,
+      from cte  order by 1 desc
+	  
+	  ####################### docs read weekly aggregated percentile#############
+	  
+	  with cte1 as ( select user_week_n,username,sum(documents_read_count) as  documents_read_count
+FROM `bi-table`
+      WHERE user_week_n >= "2021-04-01" and is_active = 1 and contact_type <> 'Internal User'
+      group by 1,2
+      order by 1 desc)
+
+, cte2 as (
+     select
+      PERCENTILE_DISC((documents_read_count), 0.90) OVER() AS percentile_90,
+      PERCENTILE_DISC((documents_read_count), 0.75) OVER() AS percentile_75,
+      PERCENTILE_DISC((documents_read_count), 1) OVER() AS percentile_max,
+      PERCENTILE_DISC((documents_read_count), 0) OVER() AS percentile_min,
+      PERCENTILE_DISC((documents_read_count), 0.5) OVER() AS percentile_median,
+      PERCENTILE_DISC((documents_read_count), 0.25) OVER() AS percentile_25,
+      FROM cte1
+ )
+      
+      select 
+      ANY_VALUE(percentile_min) as searches_percentile_min,
+      ANY_VALUE(percentile_25) as searches_percentile_25,
+      ANY_VALUE(percentile_median) as searches_percentile_median,
+      ANY_VALUE(percentile_75) as searches_percentile_75,
+      ANY_VALUE(percentile_90) as searches_percentile90,
+      ANY_VALUE(percentile_max) as searches_percentile_max,
+      from cte2  order by 1 desc
+	  
+	  by persona -- median -- daily and weekly
+	  
+	  
+	    WHERE {% condition df_daily_rolling_activity.is_active %} is_active {% endcondition %}
+          and {% condition df_daily_rolling_activity.contact_type %} contact_type {% endcondition %}
+          and {% condition df_daily_rolling_activity.user_day_n_date %} user_day_n {% endcondition %}
+          and {% condition df_daily_rolling_activity.is_on_trial %} is_on_trial {% endcondition %}
+          and {% condition df_daily_rolling_activity.is_paying %} is_paying {% endcondition %}
+          and {% condition df_daily_rolling_activity.is_search_two_enabled %} is_search_two_enabled {% endcondition %}
+           and {% condition df_daily_rolling_activity.contact_type_persona %} contact_type_persona {% endcondition %}
+		   
+		   
+		     {% if choose_breakdown._parameter_value == 'Month' %} ${created_month_name}
+    {% elsif choose_breakdown._parameter_value == 'DOY' %} ${created_day_of_year}
+    {% elsif choose_breakdown._parameter_value == 'DOM' %} ${created_day_of_month}
+    {% elsif choose_breakdown._parameter_value == 'DOW' %} ${created_day_of_week}
+    {% elsif choose_breakdown._parameter_value == 'Date' %} ${created_date}
+    {% else %}NULL{% endif %}
+	
+	
+	
+	-------------
+	 with weekly_agg as (
+    select
+    user_week_n,
+    bia_user_name_key,
+    {% parameter dra_usage_metrics_percentile_weekly.group_by %},
+    sum(documents_read_count) as  documents_read_count,
+    sum(searches_count) as searches_count,
+    sum (total_duration_minutes) as total_duration_minutes
+
+    FROM `bia-prod-268616.go_to_market_sensitive.df_daily_rolling_activity`
+      WHERE {% condition df_daily_rolling_activity.is_active %} is_active {% endcondition %}
+          and {% condition df_daily_rolling_activity.contact_type %} contact_type {% endcondition %}
+          and {% condition df_daily_rolling_activity.user_day_n_date %} user_day_n {% endcondition %}
+          and {% condition df_daily_rolling_activity.is_on_trial %} CAST(is_on_trial AS BOOL)  {% endcondition %}
+          and {% condition df_daily_rolling_activity.is_paying %} CAST(is_paying AS BOOL)  {% endcondition %}
+          and {% condition df_daily_rolling_activity.is_search_two_enabled %} is_search_two_enabled {% endcondition %}
+           and {% condition df_daily_rolling_activity.contact_type_persona %} contact_type_persona {% endcondition %}
+      group by 1,2,3
+      order by 1 desc),
+
+    percentile_calc as (
+      select
+      bia_user_name_key,
+      {% parameter dra_usage_metrics_percentile_weekly.group_by %},
+      PERCENTILE_DISC((searches_count), 0.90) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS searches_percentile_90,
+      PERCENTILE_DISC((searches_count), 0.75) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS searches_percentile_75,
+      PERCENTILE_DISC((searches_count), 1) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS searches_percentile_max,
+      PERCENTILE_DISC((searches_count), 0) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS searches_percentile_min,
+      PERCENTILE_DISC((searches_count), 0.5) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS searches_percentile_median,
+      PERCENTILE_DISC((searches_count), 0.25) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS searches_percentile_25,
+      PERCENTILE_DISC((documents_read_count), 0.90) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS docs_percentile_90,
+      PERCENTILE_DISC((documents_read_count), 0.75) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS docs_percentile_75,
+      PERCENTILE_DISC((documents_read_count), 1) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS docs_percentile_max,
+      PERCENTILE_DISC((documents_read_count), 0) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS docs_percentile_min,
+      PERCENTILE_DISC((documents_read_count), 0.5) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS docs_percentile_median,
+      PERCENTILE_DISC((documents_read_count), 0.25) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS docs_percentile_25,
+      PERCENTILE_DISC((total_duration_minutes), 0.90) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS session_percentile_90,
+      PERCENTILE_DISC((total_duration_minutes), 0.75) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS session_percentile_75,
+      PERCENTILE_DISC((total_duration_minutes), 1) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS session_percentile_max,
+      PERCENTILE_DISC((total_duration_minutes), 0) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS session_percentile_min,
+      PERCENTILE_DISC((total_duration_minutes), 0.5) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS session_percentile_median,
+      PERCENTILE_DISC((total_duration_minutes), 0.25) OVER(partition by {% parameter dra_usage_metrics_percentile_weekly.group_by %}) AS session_percentile_25
+
+      FROM weekly_agg )
+
+      select
+      {% parameter dra_usage_metrics_percentile_weekly.group_by %},
+       count(distinct bia_user_name_key) as active_users,
+      ANY_VALUE(searches_percentile_min) as searches_percentile_min,
+      ANY_VALUE(searches_percentile_25) as searches_percentile_25,
+      ANY_VALUE(searches_percentile_median) as searches_percentile_median,
+      ANY_VALUE(searches_percentile_75) as searches_percentile_75,
+      ANY_VALUE(searches_percentile_90) as searches_percentile_90,
+      ANY_VALUE(searches_percentile_max) as searches_percentile_max,
+      ANY_VALUE(docs_percentile_min) as docs_percentile_min,
+      ANY_VALUE(docs_percentile_25) as docs_percentile_25,
+      ANY_VALUE(docs_percentile_median) as docs_percentile_median,
+      ANY_VALUE(docs_percentile_75) as docs_percentile_75,
+      ANY_VALUE(docs_percentile_90) as docs_percentile_90,
+      ANY_VALUE(docs_percentile_max) as docs_percentile_max,
+      ANY_VALUE(session_percentile_min) as session_percentile_min,
+      ANY_VALUE(session_percentile_25) as session_percentile_25,
+      ANY_VALUE(session_percentile_median) as session_percentile_median,
+      ANY_VALUE(session_percentile_75) as session_percentile_75,
+      ANY_VALUE(session_percentile_90) as session_percentile_90,
+      ANY_VALUE(session_percentile_max) as session_percentile_max,
+      from percentile_calc  group by 1 order by 1 desc;;

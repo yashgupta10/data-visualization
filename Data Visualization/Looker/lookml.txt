@@ -1,0 +1,42 @@
+
+
+measure: measurevalue_count_acv_total_cw {
+    group_label: "Period Measure"
+    label: "Measure Value Count and ACV with CW"
+    type: number
+    sql: CASE WHEN ${measure_type} = 'count' THEN cast( ${MeasureValue_Flag_Total} as integer)
+      WHEN ${measure_type}= 'acv' and lower(${measure_name}) like '%sfdc%' THEN cast( Round(${MeasureValue_ACV_Total}) as integer)
+      when ${measure_type}= 'acv' then cast( Round(${MeasureValue_ACV_Total_CW}) as integer) END;;
+    required_fields: [measure_type]
+    value_format_name: usd_0
+    drill_fields: [detail*]
+    html: {% if aft_nrt_time_periods.measure_name._value contains "Total" or aft_nrt_time_periods.measure_name._value contains "Live" or aft_nrt_time_periods.measure_name._value contains "Closed"%}
+        <b>
+        {% else %}
+        {% endif %}
+
+        {% if aft_nrt_time_periods.measure_name._value contains "Qualified" %}
+        <a href="{{link |remove:",aft_nrt_time_periods.hitchhiker_name" | remove:",aft_nrt_time_periods.measurevalue_acv" |remove:",aft_nrt_time_periods.free_trial_name"| remove:",aft_nrt_time_periods.hh_requested_date_dim" | remove:",aft_nrt_time_periods.live_start_date" | remove:",aft_nrt_time_periods.close_won_date" | remove:",aft_nrt_time_periods.trial_Age" | remove:",aft_nrt_time_periods.trial_remaining_days" | remove:",aft_nrt_time_periods.days_post_trial_live" | remove:",aft_nrt_time_periods.accepted_sub_stage" | remove:",aft_nrt_time_periods.trial_live_sub_stage" | remove:",aft_nrt_time_periods.measureacv" }}&f[aft_nrt_time_periods.unique_id]=-NULL&f[aft_nrt_time_periods.measurevalue_flag_dim]=1&toggle=pik,vis,dat&vis={ {{'"type":"table"'}} } "  target="_blank">
+        {% elsif aft_nrt_time_periods.measure_name._value contains "Accepted" or aft_nrt_time_periods.measure_name._value contains "progress" %}
+        <a href="{{link | remove:",aft_nrt_time_periods.campaign_member_name" | replace:",aft_nrt_time_periods.measurevalue_acv",",aft_nrt_time_periods.MeasureValue_ACV_Total_CW" | remove:",aft_nrt_time_periods.outbound_aft_yes_date_dim" | remove:",aft_nrt_time_periods.trial_requested_date_dim" | remove:",aft_nrt_time_periods.live_start_date" | remove:",aft_nrt_time_periods.close_won_date" | remove:",aft_nrt_time_periods.days_post_trial_live" | remove:",aft_nrt_time_periods.qualified_sub_stage" | remove:",aft_nrt_time_periods.trial_live_sub_stage" | remove: ";f[aft_nrt_time_periods.sort]" | remove: ";f[aft_nrt_time_periods.measure_name]" | replace: ";f[aft_nrt_time_periods.measure_type]=count",";f[aft_nrt_time_periods.measure_type]=acv" | remove:",aft_nrt_time_periods.measureacv" }}&f[aft_nrt_time_periods.unique_id]=-NULL&f[aft_nrt_time_periods.measurevalue_flag_dim]=1&toggle=pik,vis,dat&vis={ {{'"type":"table"'}} } "  target="_blank">
+        {% elsif aft_nrt_time_periods.measure_name._value contains "Live" %}
+        <a href="{{link | remove:",aft_nrt_time_periods.campaign_member_name" | replace:",aft_nrt_time_periods.measurevalue_acv",",aft_nrt_time_periods.MeasureValue_ACV_Total_CW" | remove:",aft_nrt_time_periods.outbound_aft_yes_date_dim" | remove:",aft_nrt_time_periods.trial_requested_date_dim" | remove:",aft_nrt_time_periods.hh_requested_date_dim" | remove:",aft_nrt_time_periods.contact_msa_accept_date" | remove:",aft_nrt_time_periods.close_won_date" | remove:",aft_nrt_time_periods.qualified_sub_stage" | remove:",aft_nrt_time_periods.accepted_sub_stage"  | remove: ";f[aft_nrt_time_periods.sort]" | remove: ";f[aft_nrt_time_periods.measure_name]" | replace: ";f[aft_nrt_time_periods.measure_type]=count",";f[aft_nrt_time_periods.measure_type]=acv"| remove:",aft_nrt_time_periods.measureacv" }}&f[aft_nrt_time_periods.unique_id]=-NULL&f[aft_nrt_time_periods.measurevalue_flag_dim]=1&toggle=pik,vis,dat&vis={ {{'"type":"table"'}} } "  target="_blank">
+        {% elsif aft_nrt_time_periods.measure_name._value contains "SFDC" %}
+        <a href="{{link | remove:",aft_nrt_time_periods.campaign_member_name" | replace:",aft_nrt_time_periods.measurevalue_acv",",aft_nrt_time_periods.MeasureValue_ACV_Total_CW" | remove:",aft_nrt_time_periods.outbound_aft_yes_date_dim" | remove:",aft_nrt_time_periods.trial_requested_date_dim" | remove:",aft_nrt_time_periods.hh_requested_date_dim" | remove:",aft_nrt_time_periods.contact_msa_accept_date" | remove:",aft_nrt_time_periods.close_won_date" | remove:",aft_nrt_time_periods.qualified_sub_stage" | remove:",aft_nrt_time_periods.accepted_sub_stage"  | remove: ";f[aft_nrt_time_periods.sort]" | remove: ";f[aft_nrt_time_periods.measure_name]" | replace: ";f[aft_nrt_time_periods.measure_type]=count",";f[aft_nrt_time_periods.measure_type]=acv"| remove:",aft_nrt_time_periods.measureacv" }}&f[aft_nrt_time_periods.unique_id]=-NULL&f[aft_nrt_time_periods.measurevalue_flag_dim]=1&toggle=pik,vis,dat&vis={ {{'"type":"table"'}} } "  target="_blank">
+        {% elsif aft_nrt_time_periods.measure_name._value contains "Closed"  %}
+        <a href="{{link | remove:",aft_nrt_time_periods.campaign_member_name" | replace:",aft_nrt_time_periods.measurevalue_acv",",aft_nrt_time_periods.MeasureValue_ACV_Total_CW" | remove:",aft_nrt_time_periods.outbound_aft_yes_date_dim" | remove:",aft_nrt_time_periods.trial_requested_date_dim" | remove:",aft_nrt_time_periods.hh_requested_date_dim" | remove:",aft_nrt_time_periods.contact_msa_accept_date" | remove:",aft_nrt_time_periods.live_start_date" | remove:",aft_nrt_time_periods.trial_remaining_days" | remove:",aft_nrt_time_periods.days_post_trial_live" | remove:",aft_nrt_time_periods.enterprise_client_status" | remove:",aft_nrt_time_periods.qualified_sub_stage" | remove:",aft_nrt_time_periods.accepted_sub_stage" | remove:",aft_nrt_time_periods.trial_live_sub_stage" | remove: ";f[aft_nrt_time_periods.sort]" | remove: ";f[aft_nrt_time_periods.measure_name]" | replace: ";f[aft_nrt_time_periods.measure_type]=count",";f[aft_nrt_time_periods.measure_type]=acv" | remove:",aft_nrt_time_periods.measureacv" }}&f[aft_nrt_time_periods.unique_id]=-NULL&f[aft_nrt_time_periods.measurevalue_flag_dim]=1&toggle=pik,vis,dat&vis={ {{'"type":"table"'}} } "  target="_blank">
+        {% else %}
+        <a href="{{link | remove:",aft_nrt_time_periods.campaign_member_name" | replace:",aft_nrt_time_periods.measurevalue_acv",",aft_nrt_time_periods.MeasureValue_ACV_Total_CW" | remove:",aft_nrt_time_periods.outbound_aft_yes_date_dim" | remove:",aft_nrt_time_periods.trial_requested_date_dim" | remove:",aft_nrt_time_periods.hh_requested_date_dim" | remove:",aft_nrt_time_periods.contact_msa_accept_date" | remove:",aft_nrt_time_periods.live_start_date" | remove:",aft_nrt_time_periods.trial_remaining_days" | remove:",aft_nrt_time_periods.days_post_trial_live" | remove:",aft_nrt_time_periods.enterprise_client_status" | remove:",aft_nrt_time_periods.qualified_sub_stage" | remove:",aft_nrt_time_periods.accepted_sub_stage" | remove:",aft_nrt_time_periods.trial_live_sub_stage" | remove: ";f[aft_nrt_time_periods.sort]" | remove: ";f[aft_nrt_time_periods.measure_name]" | replace: ";f[aft_nrt_time_periods.measure_type]=count",";f[aft_nrt_time_periods.measure_type]=acv" | remove:",aft_nrt_time_periods.measureacv"}}&f[aft_nrt_time_periods.unique_id]=-NULL&f[aft_nrt_time_periods.measurevalue_flag_dim]=1&toggle=pik,vis,dat&vis={ {{'"type":"table"'}} } "  target="_blank">
+        {% endif %}
+
+        {% if aft_nrt_time_periods.measure_type._value == 'count' %}
+        {{value}}</a>
+        {% else %}
+        {{rendered_value}}</a>
+        {% endif %}
+
+        {% if aft_nrt_time_periods.measure_name._value contains "Total" %}
+        </b>
+        {% else %}
+        {% endif %} ;;
+  }
